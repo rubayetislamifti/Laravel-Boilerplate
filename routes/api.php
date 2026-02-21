@@ -12,5 +12,6 @@ Route::post('resendOtp',[AuthController::class,'resendOtp']);
 Route::post('login',[AuthController::class,'login']);
 
 Route::middleware(['jwt.auth'])->group(function () {
+    Route::post('change-password',[AuthController::class,'changePassword']);
    Route::post('logout',[AuthController::class,'logout']);
 });

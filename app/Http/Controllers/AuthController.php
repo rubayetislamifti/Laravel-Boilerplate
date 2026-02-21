@@ -6,6 +6,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -117,6 +118,47 @@ class AuthController extends Controller
             }
 
             return $this->successResponse(['token' => $token, 'user' => $user], 'Login successful', 200);
+        }catch (\Exception $exception){
+            return $this->errorResponse($exception->getMessage(),'Something went wrong',500);
+        }
+    }
+
+    public function changePassword(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(),[
+                'current_password'=>'required|string|min:6',
+                'password'=>'required|string|min:6|confirmed',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->errorResponse($validator->errors()->first(),'Validation Error',422);
+            }
+            $user = Auth::user();
+            if (!Hash::check($request->current_password,$user->password)){
+                return $this->errorResponse('Your password dose not match with your current password','Password Error',422);
+            }
+
+            $user->password = $request->password;
+            $user->save();
+            return $this->successResponse($user,'Password Changed Successfully',200);
+        }catch (\Exception $exception){
+            return $this->errorResponse($exception->getMessage(),'Something went wrong',500);
+        }
+    }
+
+    public function forgetPasswordOTPSend(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(),[
+                'email'=>'required|string|email|exists:users,email',
+            ],[
+                'email.exits'=>'This email is not store in our database'
+            ]);
+
+            if ($validator->fails()) {
+                return $this->errorResponse($validator->errors()->first(),'Validation Error',422);
+            }
         }catch (\Exception $exception){
             return $this->errorResponse($exception->getMessage(),'Something went wrong',500);
         }
