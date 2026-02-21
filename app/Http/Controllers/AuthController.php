@@ -29,6 +29,9 @@ class AuthController extends Controller
             $otp = rand(1000,9999);
             $otpExpire = Carbon::now()->addMinutes(10);
 
+            $data['otp'] = $otp;
+            $data['otp_expire'] = $otpExpire;
+
             $register = User::create($data);
             return $this->successResponse($register,'Registration successful',201);
         }catch (\Exception $exception){
