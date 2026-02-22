@@ -159,6 +159,41 @@ class AuthController extends Controller
             if ($validator->fails()) {
                 return $this->errorResponse($validator->errors()->first(),'Validation Error',422);
             }
+
+            $email = User::where('email',$request->email)->first();
+            $otp = rand(1000,9999);
+            $otpExpire = Carbon::now()->addMinutes(10);
+
+            $email->otp = $otp;
+            $email->otp_expire = $otpExpire;
+            $email->save();
+
+            return $this->successResponse($email,'OTP Send successfully',200);
+        }catch (\Exception $exception){
+            return $this->errorResponse($exception->getMessage(),'Something went wrong',500);
+        }
+    }
+
+    public function forgetPassword(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(),[
+                'email'=>'required|string|email|exists:users,email',
+                'otp'=>'required|string',
+                'password'=>'required|string|min:6|confirmed',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->errorResponse($validator->errors()->first(),'Validation Error',422);
+            }
+
+            $check = User::where('email',$request->email)->where('otp',$request->otp)->first();
+
+            $check->password = $request->password;
+            $check->otp = null;
+            $check->otp_expire = null;
+            $check->save();
+
         }catch (\Exception $exception){
             return $this->errorResponse($exception->getMessage(),'Something went wrong',500);
         }
