@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -31,7 +32,7 @@ class AuthController extends Controller
             $otpExpire = Carbon::now()->addMinutes(10);
 
             $data['otp'] = $otp;
-            $data['otp_expire'] = $otpExpire;
+            $data['expired_at'] = $otpExpire;
 
             $register = User::create($data);
             return $this->successResponse($register,'Registration successful',201);
@@ -58,7 +59,7 @@ class AuthController extends Controller
             if (!$check) {
                 return $this->successResponse('Invalid OTP','Invalid OTP',422);
             }
-            if ($check->expired_at < Carbon::now()) {
+            if (Carbon::parse($check->expired_at) < Carbon::now()) {
                 return $this->successResponse('OTP Expired','OTP Expired',422);
             }
 
@@ -202,10 +203,15 @@ class AuthController extends Controller
     public function logout()
     {
         try {
+            JWTAuth::invalidate(JWTAuth::getToken());
             Auth::logout();
 
             return $this->successResponse(Auth::user(),'Logged out successfully',200);
-        }catch (\Exception $exception){
+        }
+        catch (TokenExpiredException $exception){
+            return $this->errorResponse('Token expired',$exception->getMessage(),500);
+        }
+        catch (\Exception $exception){
             return $this->errorResponse($exception->getMessage(),'Something went wrong',500);
         }
     }
