@@ -142,7 +142,8 @@ class AuthController extends Controller
 
             $user->password = $request->password;
             $user->save();
-            return $this->successResponse($user,'Password Changed Successfully',200);
+            Auth::logout();
+            return $this->successResponse($user,'Password Changed Successfully. Please Login Again',200);
         }catch (\Exception $exception){
             return $this->errorResponse($exception->getMessage(),'Something went wrong',500);
         }
