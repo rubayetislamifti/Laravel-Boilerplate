@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
-    AuthController
+    AuthController,ProfileController,SupportController
 };
 
 Route::prefix('auth')->group(function () {
@@ -21,4 +21,7 @@ Route::middleware(['jwt.auth'])->group(function () {
         Route::post('change-password',[AuthController::class,'changePassword']);
         Route::post('logout',[AuthController::class,'logout']);
     });
+
+    Route::post('update-profile',[ProfileController::class,'updateProfile']);
+    Route::post('update-profile/image',[ProfileController::class,'updateImage']);
 });

@@ -23,6 +23,7 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
+        'image',
         'otp',
         'expired_at',
         'is_verified'
@@ -69,5 +70,9 @@ class User extends Authenticatable implements JWTSubject
     public function setPasswordAttribute(string $password)
     {
         $this->attributes['password'] = Hash::make($password);
+    }
+
+    public function getImageAttribute($value){
+        return asset($value);
     }
 }
