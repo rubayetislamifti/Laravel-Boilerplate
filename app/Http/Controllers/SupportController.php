@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Support;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class SupportController extends Controller
@@ -87,9 +88,25 @@ class SupportController extends Controller
             }
 
             $data = $validator->validated();
+            $support = Support::with('user')->find($support_id);
+            $support->update([
+                'status'=>'replied'
+            ]);
+
+            Mail::raw($data['reply'], function ($message) use ($support) {
+                $message->to($support->user->email)->subject('Support replied');
+            });
+            return $this->successResponse($support,'Support replied successfully',200);
+        }catch (\Exception $exception){
+            return $this->errorResponse($exception->getMessage(),'Something went wrong',500);
+        }
+    }
+
+    public function deleteSupport(Request $request,$support_id){
+        try {
             $support = Support::find($support_id);
-
-
+            $support->delete();
+            return $this->successResponse($support,'Support deleted successfully',200);
         }catch (\Exception $exception){
             return $this->errorResponse($exception->getMessage(),'Something went wrong',500);
         }
