@@ -35,6 +35,8 @@ Route::middleware(['jwt.auth'])->group(function () {
         Route::get('deleteSupport/{support_id}',[SupportController::class,'deleteSupport']);
 
         Route::get('faq',[FAQController::class,'getFAQ']);
+
+
         Route::post('faq',[FAQController::class,'createFaq']);
         Route::post('faq/{id}',[FAQController::class,'updateFaq']);
         Route::delete('faq/{id}',[FAQController::class,'deleteFaq']);
