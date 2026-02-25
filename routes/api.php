@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{AuthController, FAQController, ProfileController, SettingsController, SupportController};
+use App\Http\Controllers\{AuthController, FAQController, ProfileController, SettingsController, SupportController,NotificationController};
 
 Route::prefix('auth')->group(function () {
     Route::post('register',[AuthController::class,'register']);
@@ -15,6 +15,13 @@ Route::prefix('auth')->group(function () {
 
 
 Route::middleware(['jwt.auth'])->group(function () {
+
+    Route::get('unread/notifications',[NotificationController::class,'unreadNotification']);
+    Route::get('notifications', [NotificationController::class, 'getNotifications']);
+    Route::get('unread/notifications/count', [NotificationController::class, 'unreadCount']);
+    Route::post('markAsRead/{id}', [NotificationController::class, 'markAsRead']);
+    Route::post('markAllAsRead', [NotificationController::class, 'markAllAsRead']);
+
     Route::prefix('settings')->group(function () {
         Route::post('update-profile',[ProfileController::class,'updateProfile']);
         Route::post('update-profile/image',[ProfileController::class,'updateImage']);
@@ -35,8 +42,6 @@ Route::middleware(['jwt.auth'])->group(function () {
         Route::get('deleteSupport/{support_id}',[SupportController::class,'deleteSupport']);
 
         Route::get('faq',[FAQController::class,'getFAQ']);
-
-
         Route::post('faq',[FAQController::class,'createFaq']);
         Route::post('faq/{id}',[FAQController::class,'updateFaq']);
         Route::delete('faq/{id}',[FAQController::class,'deleteFaq']);
